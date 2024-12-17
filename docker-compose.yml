@@ -1,0 +1,43 @@
+name: mytheresa
+services:
+  mytheresa_api:
+    build:
+      context: .
+      dockerfile: dev.Dockerfile
+    container_name: mytheresa_api
+    depends_on:
+      - mytheresa_db
+    networks:
+      - backend
+    environment:
+      - HOST=mytheresa_db
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - DB_PORT=5432
+    ports:
+      - "9191:9090"
+    volumes:
+      - ./:/app
+
+  mytheresa_db:
+    image: postgres:12-alpine
+    container_name: mytheresa_db
+    env_file: .env
+    restart: always
+    networks:
+      - backend
+    ports:
+      - "5438:5432"
+    environment:
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - db-data:/data/postgres
+networks:
+  backend:
+
+volumes:
+  db-data:
+    driver: local
