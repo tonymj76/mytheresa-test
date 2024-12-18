@@ -4,6 +4,7 @@ package enttest
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/tonymj76/mytheresa-test/ent"
 	// required by schema hooks.
@@ -57,6 +58,7 @@ func Open(t TestingT, driverName, dataSourceName string, opts ...Option) *ent.Cl
 	o := newOptions(opts)
 	c, err := ent.Open(driverName, dataSourceName, o.opts...)
 	if err != nil {
+		fmt.Println(err)
 		t.Error(err)
 		t.FailNow()
 	}
@@ -74,10 +76,12 @@ func NewClient(t TestingT, opts ...Option) *ent.Client {
 func migrateSchema(t TestingT, c *ent.Client, o *options) {
 	tables, err := schema.CopyTables(migrate.Tables)
 	if err != nil {
+		fmt.Println(err)
 		t.Error(err)
 		t.FailNow()
 	}
 	if err := migrate.Create(context.Background(), c.Schema, tables, o.migrateOpts...); err != nil {
+		fmt.Println(err)
 		t.Error(err)
 		t.FailNow()
 	}
