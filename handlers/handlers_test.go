@@ -129,6 +129,7 @@ func TestHandler_FetchProducts(t *testing.T) {
 		{name: "when discount is not applied check if final price is the some with original price", want: 59000, queryParam: "?category=sneakers"},
 		{name: "apply discount base on boots category respectively", want: []int{62299, 69300, 49700}, queryParam: "?category=boots"},
 	}
+
 	service, err := services.NewRestService(services.WithCustomDB(db, nil))
 	if err != nil {
 		t.Fatalf("Error setting up new rest server: %v", err)
