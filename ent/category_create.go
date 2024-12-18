@@ -53,6 +53,14 @@ func (cc *CategoryCreate) SetUpdatedAt(t time.Time) *CategoryCreate {
 	return cc
 }
 
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (cc *CategoryCreate) SetNillableUpdatedAt(t *time.Time) *CategoryCreate {
+	if t != nil {
+		cc.SetUpdatedAt(*t)
+	}
+	return cc
+}
+
 // AddProductIDs adds the "products" edge to the Product entity by IDs.
 func (cc *CategoryCreate) AddProductIDs(ids ...int) *CategoryCreate {
 	cc.mutation.AddProductIDs(ids...)
@@ -107,12 +115,21 @@ func (cc *CategoryCreate) defaults() {
 		v := category.DefaultCreatedAt()
 		cc.mutation.SetCreatedAt(v)
 	}
+	if _, ok := cc.mutation.UpdatedAt(); !ok {
+		v := category.DefaultUpdatedAt()
+		cc.mutation.SetUpdatedAt(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (cc *CategoryCreate) check() error {
 	if _, ok := cc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Category.name"`)}
+	}
+	if v, ok := cc.mutation.Name(); ok {
+		if err := category.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Category.name": %w`, err)}
+		}
 	}
 	if _, ok := cc.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`ent: missing required field "Category.description"`)}
@@ -155,7 +172,7 @@ func (cc *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := cc.mutation.Description(); ok {
 		_spec.SetField(category.FieldDescription, field.TypeString, value)
-		_node.Description = value
+		_node.Description = &value
 	}
 	if value, ok := cc.mutation.CreatedAt(); ok {
 		_spec.SetField(category.FieldCreatedAt, field.TypeTime, value)
