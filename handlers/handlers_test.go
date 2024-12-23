@@ -4,6 +4,13 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"path/filepath"
+	"testing"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/guregu/null/v5"
 	"github.com/ory/dockertest/v3"
@@ -15,12 +22,6 @@ import (
 	"github.com/tonymj76/mytheresa-test/models"
 	"github.com/tonymj76/mytheresa-test/seed"
 	"github.com/tonymj76/mytheresa-test/services"
-	"net/http"
-	"net/http/httptest"
-	"os"
-	"path/filepath"
-	"testing"
-	"time"
 )
 
 var (
@@ -148,6 +149,7 @@ func TestHandler_FetchProducts(t *testing.T) {
 				route.ServeHTTP(w, req)
 				assert.Equal(t, tc.want, w.Code, "Expected HTTP 200 OK status")
 			})
+
 		case 1:
 			t.Run(tc.name, func(t *testing.T) {
 				w := httptest.NewRecorder()
@@ -161,10 +163,10 @@ func TestHandler_FetchProducts(t *testing.T) {
 					t.Fatalf("failed to unmarshal response: %v, response body: %s", err, w.Body.String())
 				}
 
-				// Uncomment and update assertion as needed
 				assert.Equal(t, tc.want, len(responseMap.Data.Products), "Unexpected product length")
 			})
-		case 2:
+
+		case 2, 3:
 			t.Run(tc.name, func(t *testing.T) {
 				w := httptest.NewRecorder()
 
@@ -177,21 +179,6 @@ func TestHandler_FetchProducts(t *testing.T) {
 					t.Fatalf("failed to unmarshal response: %v, response body: %s", err, w.Body.String())
 				}
 
-				// Uncomment and update assertion as needed
-				assert.Equal(t, tc.want, len(responseMap.Data.Products), "Unexpected product length")
-			})
-		case 3:
-			t.Run(tc.name, func(t *testing.T) {
-				w := httptest.NewRecorder()
-
-				req, _ := http.NewRequest("GET", fmt.Sprintf("/api/products%s", tc.queryParam), nil)
-				route.ServeHTTP(w, req)
-
-				var responseMap ProductTestData
-				err := json.Unmarshal(w.Body.Bytes(), &responseMap)
-				if err != nil {
-					t.Fatalf("failed to unmarshal response: %v, response body: %s", err, w.Body.String())
-				}
 				assert.Equal(t, tc.want, len(responseMap.Data.Products), "Unexpected product length")
 			})
 
